@@ -3,10 +3,12 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { FiltroDeExccecaoHttp } from './common/filtros/filtro-de-excecao-http.filter';
 import { TransformaRespostaInterceptor } from './core/http/transforma-resposta-interceptor';
 import { UsuarioModule } from './usuario/usuario.module';
+import { UsuarioController } from './usuario/usuario.controller';
+import { UsuarioService } from './usuario/usuario.service';
 
 @Module({
   imports: [UsuarioModule],
-  controllers: [],
+  controllers: [UsuarioController],
   providers: [
     {
       provide: APP_FILTER,
@@ -19,7 +21,8 @@ import { UsuarioModule } from './usuario/usuario.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: TransformaRespostaInterceptor
-    }
+    },
+    UsuarioService
   ],
 })
 export class AppModule {}
