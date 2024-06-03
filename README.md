@@ -48,6 +48,9 @@ $ npm run start:prod
 
 # database (prisma)
 $ npx prisma studio
+
+# running migration (prisma)
+$ prisma migrate dev --name name_of_migration
 ```
 
 ## Test

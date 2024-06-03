@@ -36,4 +36,9 @@ export class UsuarioController {
 
     //     await this.userRepository.create(nomeDeUsuario, email, senha, nomeCompleto, dataDeEntrada);
     // }
+
+    // @Post()
+    // async criaUsuario(@Body() usuario: Prisma.UserCreateInput) {
+    //      return this.usuarioService.cria(usuario);
+    // }
 }
