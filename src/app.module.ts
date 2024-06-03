@@ -5,6 +5,9 @@ import { TransformaRespostaInterceptor } from './core/http/transforma-resposta-i
 import { UsuarioModule } from './usuario/usuario.module';
 import { UsuarioController } from './usuario/usuario.controller';
 import { UsuarioService } from './usuario/usuario.service';
+import { PrismaService } from './database/prisma.service';
+import { UsersRepository } from './repositories/users-repository';
+import { PrismaUsersRepository } from './repositories/prisma/prisma-users-repository';
 
 @Module({
   imports: [UsuarioModule],
@@ -22,7 +25,12 @@ import { UsuarioService } from './usuario/usuario.service';
       provide: APP_INTERCEPTOR,
       useClass: TransformaRespostaInterceptor
     },
-    UsuarioService
+    UsuarioService,
+    PrismaService,
+    {
+      provide: UsersRepository,
+      useClass: PrismaUsersRepository
+    },
   ],
 })
 export class AppModule {}
