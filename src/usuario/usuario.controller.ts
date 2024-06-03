@@ -3,7 +3,7 @@ import { NestResponse } from '../core/http/nest-response';
 import { NestResponseBuilder } from '../core/http/nest-response-builder';
 import { Usuario } from './usuario.entity';
 import { UsuarioService } from './usuario.service';
-import { PrismaService } from 'src/database/prisma.service';
+import { PrismaService } from '../database/prisma.service';
 
 @Controller('users')
 export class UsuarioController {
