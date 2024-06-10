@@ -81,7 +81,7 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
   Nest is [MIT licensed](LICENSE).
 
 ## TO DO
-- [ ] Add MongoDB Connection
-- [ ] Add Swagger
+- [x] Add MongoDB Connection
+- [x] Add Swagger
 - [ ] Add Unit Test
 - [ ] Add e2e Test
