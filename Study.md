@@ -173,12 +173,97 @@ export class AppModule {}
 ```
 ## Repository
 Padrão de design que abstrai a camada de dados, centralizando o local para interagir com a fonte de dados. Esse padrão é geralmente usado para administrar os acessos lógicos aos dados, facilitando a troca de fonte de dados sem mudar a regra de negócio. Entre os benefícios de usar os repositórios, temos a abstração dos dados, manutenção, consistência e testabilidade, pois facilita a escrita dos testes unitários por associação a mocks e stubs para a camada de dados. O conceito do repository é usado de forma separada quanto está usando o um ORM como o TypeORM por exemplo. Já quando se usa o Prisma, o equivalente dele acaba sendo o próprio Service.
+```
+import { EntityRepository, Repository } from 'typeorm';
+import { User } from './user.entity';
+
+@EntityRepository(User)
+export class UserRepository extends Repository<User> {
+  async findByEmail(email: string): Promise<User> {
+    return this.findOne({ email });
+  }
+
+  async findAllUsersWithPosts(): Promise<User[]> {
+    return this.createQueryBuilder('user')
+      .leftJoinAndSelect('user.posts', 'post')
+      .getMany();
+  }
+}
+```
+```
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from './prisma.service';
+import { User, Prisma } from '@prisma/client';
+
+@Injectable()
+export class UserRepository {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findByEmail(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { email },
+    });
+  }
+
+  async findAllUsersWithPosts(): Promise<User[]> {
+    return this.prisma.user.findMany({
+      include: { posts: true },
+    });
+  }
+
+  async createUser(data: Prisma.UserCreateInput): Promise<User> {
+    return this.prisma.user.create({
+      data,
+    });
+  }
+}
+```
 
 ## Factory
 No NestJS o padrão de design é usado para criar instâncias de objetos. Os factories encapsulam a instanciação da lógica, permitindo maior flexibilidade e manutenção dos códigos. No NestJS, eles são usados para criar e configurar serviços, provedores, ou outros objetos dinamicamente, baseado na configuração em tempo real ou nas configurações de ambiente.
 
+```
+// database.factory.ts
+import { Provider } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { DatabaseService } from './database.service.interface';
+import { PostgreSQLService } from './postgresql.service';
+import { MongoDBService } from './mongodb.service';
+
+export const DatabaseFactory: Provider = {
+  provide: 'DatabaseService',
+  useFactory: (configService: ConfigService): DatabaseService => {
+    const dbType = configService.get<string>('DATABASE_TYPE');
+    
+    if (dbType === 'postgresql') {
+      return new PostgreSQLService();
+    } else if (dbType === 'mongodb') {
+      return new MongoDBService();
+    } else {
+      throw new Error('Unsupported database type');
+    }
+  },
+  inject: [ConfigService],
+};
+```
+
 ## Helper
 Os helper no NestJS são funções ou classes de utilidade que provem funcionalidades comuns para várias partes da aplicação. Eles encapsulam tarefas genéricas e repetitivas, promovendo reusabilidade e manutenibilidade do código. Os helpers pode performar tarefas como transformação de dados, validação, logging e outras operações de utilidade que não pertencem ao específico serviço ou módulo.
+
+```
+// helpers/validation.helper.ts
+export function transformAndValidateUserData(data: any): any {
+  // Example: Transform the data
+  data.fullName = `${data.firstName} ${data.lastName}`;
+  
+  // Example: Validate the data
+  if (!data.email.includes('@')) {
+    throw new Error('Invalid email address');
+  }
+  
+  return data;
+}
+```
 
 ## Decorator
 Decorators é um recurso fundamental do NestJS, inspirado no padrão de decoradores na programação orientada a objetos. Há tipos de declarações especiais que podem ser adicionados as classes, métodos, propriedades ou parâmetros. Decoradores permitem modificar o comportamento dos elementos decorados, adicionando metadados ou comportamentos de forma declarativa.
@@ -190,12 +275,35 @@ Tipos de decorators:
 - Decoradores de Parâmetros: Usado para anotar parâmetros do método. Exemplos comuns incluem @Param, @Body e @Query.
 
 Decorators usados normalmente no NestJS:
-@Controller: Define um controller.
-@Get, @Post, @Put, @Delete, etc.: Define métodos HTTP.
-@Injectable: Marca uma classe como um provider que pode ser injetado como dependência.
-@Module: Define o módulo.
-@Param, @Query, @Body, etc.: Extrai parâmetros de requisição das rotas.
-@UseGuards, @UseInterceptors, @UsePipes: Aplica guards, interceptors e pipes aos controladores ou métodos.
+- @Controller: Define um controller.
+- @Get, @Post, @Put, @Delete, etc.: Define métodos HTTP.
+- @Injectable: Marca uma classe como um provider que pode ser injetado como dependência.
+- @Module: Define o módulo.
+- @Param, @Query, @Body, etc.: Extrai parâmetros de requisição das rotas.
+- @UseGuards, @UseInterceptors, @UsePipes: Aplica guards, interceptors e pipes aos controladores ou métodos.
+
+```
+// log-execution-time.decorator.ts
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
+
+@Injectable()
+export class LogExecutionTimeInterceptor implements NestInterceptor {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const now = Date.now();
+    return next.handle().pipe(
+      tap(() => console.log(`Execution time: ${Date.now() - now}ms`)),
+    );
+  }
+}
+
+import { applyDecorators, UseInterceptors } from '@nestjs/common';
+
+export function LogExecutionTime() {
+  return applyDecorators(UseInterceptors(LogExecutionTimeInterceptor));
+}
+```
 
 ## Singleton
 Um singleton é um padrão de design que garante que a classe tenha uma única instância e provem um ponto global para acessar ele. No contexto do NestJS, singletons são particularmente úteis para gerenciar recursos compartilhados, como conexões de banco de dados, configurações ou serviços de manutenção de estado.
@@ -211,6 +319,35 @@ Conceitos Chaves:
 - Vinculação: Interceptors são vinculados globalmente, no nível do controlador, ou no nível da manipulação de rota.
 - Interface de interceptação do Nest: Implementa a interface de interceptação do Nest, o que requer uma definição de um método de interceptação.
 
+```
+// logging.interceptor.ts
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
+
+@Injectable()
+export class LoggingInterceptor implements NestInterceptor {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const request = context.switchToHttp().getRequest();
+    const method = request.method;
+    const url = request.url;
+    const now = Date.now();
+
+    console.log(`Incoming Request: ${method} ${url}`);
+
+    return next
+      .handle()
+      .pipe(
+        tap((response) => {
+          const responseTime = Date.now() - now;
+          console.log(`Outgoing Response: ${method} ${url} - ${responseTime}ms`);
+          console.log(`Response Data: `, response);
+        }),
+      );
+  }
+}
+```
+
 ## Middleware
 As funções do middleware é uma parte integral no processo da requisição da pipeline no NestJS. Eles são funções que executam antes dos recursos compartilhados serem invocados, permitindo modificar objetos de requisição e a resposta para operar outras ações.
 
@@ -224,3 +361,35 @@ Middleware de aplicação por nível: Definido no módulo da aplicação princip
 Middleware por rotas específicas: Aplicado para rotas específicas ou controladores.
 Middleware funcional: Funções simples que pegam req, res e next como argumentos.
 Middleware baseado em classes: Classes que implementam a interface NestMiddleware.
+
+```
+// logging.middleware.ts
+import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
+
+@Injectable()
+export class LoggingMiddleware implements NestMiddleware {
+  use(req: Request, res: Response, next: NextFunction) {
+    console.log(`${req.method} ${req.url}`);
+    next();
+  }
+}
+```
+```
+// auth.middleware.ts
+import { Injectable, NestMiddleware, UnauthorizedException } from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
+
+@Injectable()
+export class AuthMiddleware implements NestMiddleware {
+  use(req: Request, res: Response, next: NextFunction) {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || authHeader !== 'Bearer secret-token') {
+      throw new UnauthorizedException('Invalid token');
+    }
+    
+    next();
+  }
+}
+```
