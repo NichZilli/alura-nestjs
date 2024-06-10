@@ -1,25 +1,19 @@
 import { Injectable } from "@nestjs/common";
 import { Usuario } from "./usuario.entity";
+import { CreateUserDto } from "./create-user.dto";
 
 @Injectable()
 export class UsuarioService {
-    private usuarios: Array<Usuario> = [{
-        id: 1,
-        nomeDeUsuario: 'nicholas',
-        email: 'nich.zilli@hotmail.com',
-        senha: '123456',
-        nomeCompleto: 'Nicholas Gomez Zilli Castro',
-        dataDeEntrada: new Date()
-    }];
+    private usuarios: Array<Usuario> = [];
 
-    public cria(usuario: Usuario): Usuario {
+    public cria(usuario: CreateUserDto): Usuario {
         this.usuarios.push(usuario);
 
         return usuario;
     }
 
-    public buscaPorNomeDeUsuario(nomeDeUsuario: string): Usuario {
-        return this.usuarios.find(usuario => usuario.nomeDeUsuario == nomeDeUsuario);
+    public buscaPorID(id: number): Usuario {
+        return this.usuarios[id];
     }
 
     public listaUsuarios(): Usuario[] {

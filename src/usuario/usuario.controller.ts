@@ -4,30 +4,27 @@ import { NestResponseBuilder } from '../core/http/nest-response-builder';
 import { Usuario } from './usuario.entity';
 import { UsuarioService } from './usuario.service';
 import { PrismaService } from '../database/prisma.service';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+// @ApiBearerAuth()
+@ApiTags('Users')
 @Controller('users')
 export class UsuarioController {
 
-    constructor(private prisma: PrismaService) {}
+    constructor(private readonly usuarioService: UsuarioService) {}
 
+    @ApiOperation({ summary: 'Get a User by ID' })
+    @ApiResponse({ status: 200, description: 'OK', type: Usuario })
     @Get(':idDoUsuario')
-    public async listaUsuario(@Param('idDoUsuario') idDoUsuario: number) {
-        const usuario = await this.prisma.usuario.findUnique({
-            where: {
-                id: idDoUsuario
-            }
-        });
-
-        return {
-            usuario
-        };
+    public async listaUsuario(@Param('idDoUsuario') idDoUsuario: number): Promise<Usuario> {
+        return this.usuarioService.buscaPorID(+idDoUsuario);
     }
 
+    @ApiOperation({ summary: 'Get all Users' })
+    @ApiResponse({ status: 200, description: 'OK', type: Usuario })
     @Get()
     public async listarUsuarios() {
-        const usuarios = await this.prisma.usuario.findMany();
-
-        return { usuarios };
+        return this.usuarioService.listaUsuarios();
     }
 
     // @Post()
