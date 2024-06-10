@@ -1,33 +1,33 @@
 import { Exclude, Expose } from "class-transformer";
 import { IsEmail, IsNotEmpty, IsString } from "class-validator";
-import { IsNomeDeUsuarioUnico } from "./is-nome-de-usuario-unico.validator";
+import { IsUniqueUserEmail } from "./validators/is-user-email-unique.validator";
 import { ApiProperty } from "@nestjs/swagger";
 
 
-export class Usuario {
+export class User {
     @ApiProperty({ example: 1, description: 'ID of the User' })
-    id: number;
+    id: string;
 
     @Expose({
         name: 'userName'
     })
-    @IsNomeDeUsuarioUnico({
-        message: 'nomeDeUsuario precisa ser único.'
-    })
     @IsNotEmpty({
-        message: 'nomeDeUsuario é obrigatório.'
+        message: 'userName é obrigatório.'
     })
     @IsString({
-        message: 'nomeDeUsuario precisa ser uma string.'
+        message: 'userName precisa ser uma string.'
     })
     @ApiProperty({ example: 'Nicholas', description: 'The name of the User' })
-    nomeDeUsuario: string;
+    userName: string;
 
     @Expose({
         name: 'email'
     })
     @IsEmail({}, {
         message: 'email precisa ser um endereço de email válido.'
+    })
+    @IsUniqueUserEmail({
+        message: 'user email precisa ser único.'
     })
     @ApiProperty({ example: 'nich.zilli@hotmail.com', description: 'The email of the User' })
     email: string;
@@ -48,14 +48,17 @@ export class Usuario {
         name: 'fullName'
     })
     @IsNotEmpty({
-        message: 'nomeCompleto é obrigatório.'
+        message: 'fullName é obrigatório.'
     })
     @ApiProperty({ example: 'Nicholas Gomez Zilli Castro', description: 'The full name of the User' })
-    nomeCompleto: string;
+    fullName: string;
 
     @Expose({
         name: 'joinDate'
     })
     @ApiProperty({ example: '2024/06/10', description: 'The date where the User joined' })
-    dataDeEntrada: Date;
+    createdAt: Date;
+
+    @ApiProperty({ example: '2024/06/10', description: 'The date where the User was updated' })
+    updatedAt: Date;
 }
