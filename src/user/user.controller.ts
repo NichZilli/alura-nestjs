@@ -2,7 +2,7 @@ import { Controller, Post, Body, Get, Param, Put, Delete } from '@nestjs/common'
 import { User } from './user.entity';
 import { UserService } from './user.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 
 // @ApiBearerAuth()
@@ -20,6 +20,7 @@ export class UserController {
     }
 
     @ApiOperation({ summary: 'Create a User' })
+    @ApiBody({ type: CreateUserDto, description: 'The body for create a User' })
     @ApiResponse({ status: 204, description: 'OK', type: User })
     @Post()
     public async createUser(@Body() createUserDto: CreateUserDto): Promise<CreateUserDto> {

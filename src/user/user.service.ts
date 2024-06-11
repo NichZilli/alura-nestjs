@@ -7,7 +7,7 @@ import { PrismaService } from "../prisma/prisma.service";
 export class UserService {
     constructor(private prisma: PrismaService) {}
 
-    async getUser(id: string): Promise<CreateUserDto | null> {
+    async getUser(id: string): Promise<User | null> {
         const user = await this.prisma.user.findUnique({
             where: { id },
           });
@@ -19,21 +19,19 @@ export class UserService {
               password: user.password,
               fullName: user.fullName,
               createdAt: user.createdAt,
-              updatedAt: user.updatedat
+              updatedAt: user.updatedAt
             };
           }
           return null;
     }
 
-    async createUser(createUserDto: CreateUserDto): Promise<CreateUserDto> {
+    async createUser(createUserDto: CreateUserDto): Promise<User> {
         const user = await this.prisma.user.create({
             data: {
               userName: createUserDto.userName,
               email: createUserDto.email,
               password: createUserDto.password,
-              fullName: createUserDto.fullName,
-              createdAt: createUserDto.createdAt,
-              updatedat: createUserDto.updatedAt
+              fullName: createUserDto.fullName
             },
           });
           return {
@@ -43,7 +41,7 @@ export class UserService {
             password: user.password,
             fullName: user.fullName,
             createdAt: user.createdAt,
-            updatedAt: user.updatedat
+            updatedAt: user.updatedAt
           };
     }
 }

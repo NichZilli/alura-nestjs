@@ -23,6 +23,7 @@ async function bootstrap() {
     .setTitle('API example')
     .setDescription('This is the API description')
     .setVersion('1.0')
+    .addServer('http://localhost:3000', 'Local environment')
     .addTag('Users')
 //    .addBearerAuth()
     .build();

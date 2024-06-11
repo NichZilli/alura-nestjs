@@ -51,6 +51,8 @@ $ npx prisma studio
 
 # running migration (prisma)
 $ prisma migrate dev --name name_of_migration
+$ npx prisma db push
+$ npx prisma generate
 ```
 
 ## Test

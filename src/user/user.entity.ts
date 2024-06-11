@@ -42,7 +42,7 @@ export class User {
         message: 'senha é obrigatório.'
     })
     @ApiProperty({ example: 'test1234', description: 'The password of the User' })
-    senha: string;
+    password: string;
 
     @Expose({
         name: 'fullName'
