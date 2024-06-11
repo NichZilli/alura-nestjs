@@ -8,7 +8,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 // @ApiBearerAuth()
 @ApiTags('Users')
 @Controller('users')
-export class UsuarioController {
+export class UserController {
 
     constructor(private readonly userService: UserService) {}
 
