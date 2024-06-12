@@ -8,21 +8,23 @@ export class UserService {
     constructor(private prisma: PrismaService) {}
 
     async getUser(id: string): Promise<User | null> {
-        const user = await this.prisma.user.findUnique({
-            where: { id },
-          });
-          if (user) {
-            return {
-              id: user.id,
-              userName: user.userName,
-              email: user.email,
-              password: user.password,
-              fullName: user.fullName,
-              createdAt: user.createdAt,
-              updatedAt: user.updatedAt
-            };
-          }
-          return null;
+      const user = await this.prisma.user.findFirst({
+        where: { id: id }
+      });
+
+      if (user) {
+        return {
+          id: user.id,
+          userName: user.userName,
+          email: user.email,
+          password: user.password,
+          fullName: user.fullName,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt
+        };
+      }
+
+      return null;
     }
 
     async createUser(createUserDto: CreateUserDto): Promise<User> {
