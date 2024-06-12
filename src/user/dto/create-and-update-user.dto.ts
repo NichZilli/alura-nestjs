@@ -2,7 +2,7 @@ import { IsDate, IsNotEmpty, IsString, MaxLength, MinLength } from "class-valida
 import { IsUniqueUserEmail } from "../validators/is-user-email-unique.validator";
 import { ApiProperty } from "@nestjs/swagger";
 
-export class CreateUserDto {
+export class CreateAndUpdateUserDto {
   //@IsString()
   //id: string;
 
