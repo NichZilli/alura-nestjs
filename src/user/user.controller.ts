@@ -1,11 +1,10 @@
 import { Controller, Post, Body, Get, Param, Put, Delete } from '@nestjs/common';
 import { User } from './user.entity';
 import { UserService } from './user.service';
-import { PrismaService } from '../prisma/prisma.service';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateAndUpdateUserDto } from './dto/create-and-update-user.dto';
 
-// @ApiBearerAuth()
+// TO DO: Add @ApiBearerAuth()
 @ApiTags('Users')
 @Controller('users')
 export class UserController {
@@ -36,10 +35,17 @@ export class UserController {
 
     @ApiOperation({ summary: 'Update a User by ID' })
     @ApiBody({ type: CreateAndUpdateUserDto, description: 'The body for update a User' })
-    @ApiResponse({ status: 200, description: 'OK', type: User })
+    @ApiResponse({ status: 200, description: 'User Updated', type: User })
     @Put(':id')
     public async updateUser(@Param('id') id: string, @Body() updateUserDto: CreateAndUpdateUserDto): Promise<CreateAndUpdateUserDto> {
         return this.userService.updateUser(id, updateUserDto.userName, updateUserDto.email, updateUserDto.password,
                                            updateUserDto.fullName);
+    }
+
+    @ApiOperation({ summary: 'Delete a User by ID' })
+    @ApiResponse({ status: 200, description: 'User Deleted', type: User })
+    @Delete(':id')
+    public async deleteUser(@Param('id') id: string) {
+        return this.userService.deleteUser(id);
     }
 }
