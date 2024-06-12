@@ -5,7 +5,7 @@ import { ApiProperty } from "@nestjs/swagger";
 
 
 export class User {
-    @ApiProperty({ example: 1, description: 'ID of the User' })
+    @ApiProperty({ example: '6669f186040f465befeed47e', description: 'ID of the User' })
     id: string;
 
     @Expose({
@@ -56,9 +56,9 @@ export class User {
     @Expose({
         name: 'joinDate'
     })
-    @ApiProperty({ example: '2024/06/10', description: 'The date where the User joined' })
+    @ApiProperty({ example: '2024-06-12T19:05:42.175Z', description: 'The date where the User joined' })
     createdAt: Date;
 
-    @ApiProperty({ example: '2024/06/10', description: 'The date where the User was updated' })
+    @ApiProperty({ example: '2024-06-12T19:05:42.175Z', description: 'The date where the User was updated' })
     updatedAt: Date;
 }
