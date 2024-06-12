@@ -8,10 +8,13 @@ import { UserService } from './user/user.service';
 import { PrismaService } from './prisma/prisma.service';
 import { UsersRepository } from './repositories/users-repository';
 import { PrismaUsersRepository } from './repositories/prisma/prisma-users-repository';
+import { MongooseModule } from '@nestjs/mongoose';
+import { AppService } from './app.service';
+import { AppController } from './app.controller';
 
 @Module({
-  imports: [UserModule],
-  controllers: [UserController],
+  imports: [UserModule, MongooseModule.forRoot(process.env.DATABASE_URL)],
+  controllers: [AppController, UserController],
   providers: [
     {
       provide: APP_FILTER,
@@ -25,6 +28,7 @@ import { PrismaUsersRepository } from './repositories/prisma/prisma-users-reposi
       provide: APP_INTERCEPTOR,
       useClass: TransformaRespostaInterceptor
     },
+    AppService,
     UserService,
     PrismaService,
     {

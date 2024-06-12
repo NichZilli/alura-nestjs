@@ -12,10 +12,10 @@ export class User {
         name: 'userName'
     })
     @IsNotEmpty({
-        message: 'userName é obrigatório.'
+        message: 'userName is required.'
     })
     @IsString({
-        message: 'userName precisa ser uma string.'
+        message: 'userName needs to be a string.'
     })
     @ApiProperty({ example: 'Nicholas', description: 'The name of the User' })
     userName: string;
@@ -24,10 +24,10 @@ export class User {
         name: 'email'
     })
     @IsEmail({}, {
-        message: 'email precisa ser um endereço de email válido.'
+        message: 'email needs to be valid.'
     })
     @IsUniqueUserEmail({
-        message: 'user email precisa ser único.'
+        message: 'user email needs to be unique.'
     })
     @ApiProperty({ example: 'nich.zilli@hotmail.com', description: 'The email of the User' })
     email: string;
@@ -39,7 +39,7 @@ export class User {
         toPlainOnly: true
     })
     @IsNotEmpty({
-        message: 'senha é obrigatório.'
+        message: 'password is required.'
     })
     @ApiProperty({ example: 'test1234', description: 'The password of the User' })
     password: string;
@@ -48,7 +48,7 @@ export class User {
         name: 'fullName'
     })
     @IsNotEmpty({
-        message: 'fullName é obrigatório.'
+        message: 'fullName is required.'
     })
     @ApiProperty({ example: 'Nicholas Gomez Zilli Castro', description: 'The full name of the User' })
     fullName: string;

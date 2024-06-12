@@ -11,7 +11,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalPipes(new ValidationPipe({
-    transform: true
+    whitelist: true
   }));
 
   // Starts listening for shutdown hooks
@@ -25,6 +25,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .addServer('http://localhost:3000', 'Local environment')
     .addTag('Users')
+    .addTag('Hello')
 //    .addBearerAuth()
     .build();
 
@@ -32,6 +33,6 @@ async function bootstrap() {
 
   SwaggerModule.setup('api', app, document);
 
-  await app.listen(3000);
+  await app.listen(process.env.APP_PORT);
 }
 bootstrap();
