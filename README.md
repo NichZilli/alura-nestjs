@@ -49,10 +49,10 @@ $ npm run start:prod
 # database (prisma)
 $ npx prisma studio
 
-# running migration (prisma)
-$ prisma migrate dev --name name_of_migration
+# prisma commands
 $ npx prisma db push
 $ npx prisma generate
+$ npx prisma migrate
 ```
 
 ## Test
@@ -85,5 +85,6 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## TO DO
 - [x] Add MongoDB Connection
 - [x] Add Swagger
+- [x] Add Docker
 - [ ] Add Unit Test
 - [ ] Add e2e Test
