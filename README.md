@@ -49,10 +49,10 @@ $ npm run start:prod
 # database (prisma)
 $ npx prisma studio
 
-# running migration (prisma)
-$ prisma migrate dev --name name_of_migration
+# prisma commands
 $ npx prisma db push
 $ npx prisma generate
+$ npx prisma migrate
 ```
 
 ## Test
