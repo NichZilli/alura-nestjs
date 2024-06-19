@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { User } from "./user.entity";
 import { CreateAndUpdateUserDto } from "./dto/create-and-update-user.dto";
 import { PrismaService } from "../prisma/prisma.service";
@@ -52,28 +52,34 @@ export class UserService {
   }
 
   async updateUser(id: string, userName: string, email: string, password: string, fullName: string): Promise<User | null> {
-    const user = await this.prisma.user.findFirst({
-      where: { id: id }
-    });
-
-    if (user) {
-      user.userName = userName;
-      user.email = email;
-      user.password = password;
-      user.fullName = fullName;
-
-      return {
-        id: user.id,
-        userName: user.userName,
-        email: user.email,
-        password: user.password,
-        fullName: user.fullName,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt
-      };
+    try {
+      const updatedUser = await this.prisma.user.update({
+        where: { id: id },
+        data: {
+          userName: userName,
+          email: email,
+          password: password,
+          fullName: fullName,
+          updatedAt: new Date(),
+        },
+      });
+  
+      if (updatedUser) {
+        return {
+          id: updatedUser.id,
+          userName: updatedUser.userName,
+          email: updatedUser.email,
+          password: updatedUser.password,
+          fullName: updatedUser.fullName,
+          createdAt: updatedUser.createdAt,
+          updatedAt: updatedUser.updatedAt,
+        };
+      }
+  
+      return null;
+    } catch (error) {
+      throw new NotFoundException(`User with ID ${id} not found.`);
     }
-
-    return null;
   }
 
   async deleteUser(id: string) {

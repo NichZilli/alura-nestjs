@@ -143,26 +143,25 @@ describe('UserService', () => {
     });
 
     it(`should return NotFoundException when no user is found`, async () => {
-      const notFoundUser = {
-        id: 'random user id',
-        userName: 'user_random_name',
-        email: 'user_random_email@email.com',
-        password: 'test312',
-        fullName: 'User Name Random'
-      };
+      const notFoundUserId = 'a invalid user id';
 
       jest.spyOn(prisma.user, 'update').mockRejectedValue(new Error());
 
       try {
-        await service.updateUser(notFoundUser.id, notFoundUser.userName, notFoundUser.email, notFoundUser.password, notFoundUser.fullName);
+        await service.updateUser(notFoundUserId, 'new_user_name', 'new_email@example.com', 'new_password', 'New Full Name');
       } catch (error) {
-        expect(error).toEqual(new NotFoundException());
+        expect(error).toBeInstanceOf(NotFoundException);
+        expect(error).toEqual(new NotFoundException(`User with ID ${notFoundUserId} not found.`));
       }
 
+      expect(prisma.user.update).toHaveBeenCalledTimes(1);
       expect(prisma.user.update).toHaveBeenCalledWith({
-        where: { id: notFoundUser.id },
+        where: { id: notFoundUserId },
         data: {
-          ...notFoundUser,
+          userName: 'new_user_name',
+          email: 'new_email@example.com',
+          password: 'new_password',
+          fullName: 'New Full Name',
           updatedAt: expect.any(Date),
         },
       });
