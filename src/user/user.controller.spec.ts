@@ -25,11 +25,12 @@ describe('User Controller', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      controllers: [UserController],
       providers: [
         {
           provide: UserService,
           useValue: {
-            findAll: jest.fn().mockResolvedValue([
+            getUsers: jest.fn().mockResolvedValue([
               {
                 userName: 'user_name',
                 email: 'user@email.com',
@@ -49,7 +50,10 @@ describe('User Controller', () => {
                 fullName: 'User Name Three'
               },
             ]),
-            create: jest.fn().mockResolvedValue(createAndUpdateUserDto),
+            createUser: jest.fn().mockResolvedValue(mockUser),
+            getUser: jest.fn().mockResolvedValue(mockUser),
+            updateUser: jest.fn().mockResolvedValue(mockUser),
+            deleteUser: jest.fn().mockResolvedValue(mockUser)
           },
         },
       ],
@@ -72,7 +76,7 @@ describe('User Controller', () => {
 
   describe('findAll()', () => {
     it('should return an array of users', async () => {
-      expect(controller.getUsers()).resolves.toEqual([
+      await expect(controller.getUsers()).resolves.toEqual([
         {
           userName: 'user_name',
           email: 'user@email.com',
@@ -92,7 +96,7 @@ describe('User Controller', () => {
           fullName: 'User Name Three'
         },
       ]);
-      expect(service.getUsers()).toHaveBeenCalled();
+      expect(service.getUsers).toHaveBeenCalled();
     });
   });
 });
