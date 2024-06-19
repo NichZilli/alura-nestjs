@@ -1,84 +1,195 @@
-import { getModelToken } from '@nestjs/mongoose';
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { Model } from 'mongoose';
-import { UserService } from '../user/user.service';
-import { User } from '../user/schemas/user.schema';
 import { PrismaService } from '../prisma/prisma.service';
+import { UserService } from '../user/user.service';
+import { randomUUID } from 'crypto';
 
-const mockUser = {
-  userName: 'user_name',
-  email: 'user@email.com',
-  password: 'test123',
-  fullName: 'User Name'
+const fakeDate = new Date();
+
+const fakeUsers = [
+  {
+    id: 'a user id',
+    userName: 'user_name',
+    email: 'user@email.com',
+    password: 'test123',
+    fullName: 'User Name',
+    createdAt: fakeDate,
+    updatedAt: fakeDate
+  },
+  {
+    id: 'a user two id',
+    userName: 'user_name_two',
+    email: 'user_two@email.com',
+    password: 'test312',
+    fullName: 'User Name Two',
+    createdAt: fakeDate,
+    updatedAt: fakeDate
+  },
+  {
+    id: 'a user three id',
+    userName: 'user_name_three',
+    email: 'user_three@email.com',
+    password: 'test321',
+    fullName: 'User Name Three',
+    createdAt: fakeDate,
+    updatedAt: fakeDate
+  },
+];
+
+const prismaMock = {
+  user: {
+    create: jest.fn().mockReturnValue(fakeUsers[0]),
+    findMany: jest.fn().mockResolvedValue(fakeUsers),
+    findFirst: jest.fn().mockResolvedValue(fakeUsers[0]),
+    update: jest.fn().mockResolvedValue(fakeUsers[0]),
+    delete: jest.fn(),
+  },
 };
 
 describe('UserService', () => {
   let service: UserService;
-  let model: Model<User>;
-
-  const usersArray = [
-    {
-      userName: 'user_name',
-      email: 'user@email.com',
-      password: 'test123',
-      fullName: 'User Name'
-    },
-    {
-      userName: 'user_name_two',
-      email: 'user_two@email.com',
-      password: 'user123',
-      fullName: 'User Name Two'
-    },
-  ];
+  let prisma: PrismaService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserService,
-        {
-          provide: getModelToken('User'),
-          useValue: {
-            new: jest.fn().mockResolvedValue(mockUser),
-            constructor: jest.fn().mockResolvedValue(mockUser),
-            find: jest.fn(),
-            create: jest.fn(),
-            exec: jest.fn(),
-          },
-        },
+        { provide: PrismaService, useValue: prismaMock },
       ],
     }).compile();
 
     service = module.get<UserService>(UserService);
-    model = module.get<Model<User>>(getModelToken('User'));
+    prisma = module.get<PrismaService>(PrismaService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('should return all users', async () => {
-    jest.spyOn(model, 'find').mockReturnValue({
-      exec: jest.fn().mockResolvedValueOnce(usersArray),
-    } as any);
-    const users = await service.getUsers();
-    expect(users).toEqual(usersArray);
-  });
+  describe('getUsers', () => {
+    it(`should return an array of users`, async () => {
+      const response = await service.getUsers();
 
-  it('should insert a new user', async () => {
-    jest.spyOn(model, 'create').mockImplementationOnce(() =>
-      Promise.resolve({
-        userName: 'user_name',
-        email: 'user@email.com',
-        password: 'test123',
-        fullName: 'User Name',
-      } as any),
-    );
-    const newUser = await service.createUser({
-      userName: 'user_name',
-      email: 'user@email.com',
-      password: 'test123',
-      fullName: 'User Name',
+      expect(response).toEqual(fakeUsers);
+      expect(prisma.user.findMany).toHaveBeenCalledTimes(1);
+      expect(prisma.user.findMany).toHaveBeenCalledWith();
     });
-    expect(newUser).toEqual(mockUser);
+  });
+
+  describe('getUser', () => {
+    it(`should return a single user`, async () => {
+      const response = await service.getUser(fakeUsers[0].id);
+
+      expect(response).toEqual(fakeUsers[0]);
+      expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
+      expect(prisma.user.findFirst).toHaveBeenCalledWith({
+        where: { id: fakeUsers[0].id },
+      });
+    });
+
+    it(`should return nothing when user is not found`, async () => {
+      jest.spyOn(prisma.user, 'findFirst').mockResolvedValue(undefined);
+
+      const randomId = randomUUID();
+      const response = await service.getUser(randomId);
+
+      expect(response).toBeNull();
+      expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
+      expect(prisma.user.findFirst).toHaveBeenCalledWith({
+        where: { id: randomId },
+      });
+    });
+  });
+
+  describe('createUser', () => {
+    it(`should create a new user`, async () => {
+      const userInput = {
+        userName: fakeUsers[0].userName,
+        email: fakeUsers[0].email,
+        password: fakeUsers[0].password,
+        fullName: fakeUsers[0].fullName
+      };
+
+      const response = await service.createUser(userInput);
+
+      expect(response).toStrictEqual(fakeUsers[0]);
+      expect(prisma.user.create).toHaveBeenCalledTimes(1);
+      expect(prisma.user.create).toHaveBeenCalledWith({
+        data: userInput,
+      });
+    });
+  });
+
+  describe('updateUser', () => {
+    it(`should update a user`, async () => {
+      const userUpdateData = {
+        userName: fakeUsers[0].userName,
+        email: fakeUsers[0].email,
+        password: fakeUsers[0].password,
+        fullName: fakeUsers[0].fullName,
+      };
+
+      const response = await service.updateUser(fakeUsers[0].id, userUpdateData.userName, userUpdateData.email, userUpdateData.password, userUpdateData.fullName);
+
+      expect(response).toEqual(fakeUsers[0]);
+      expect(prisma.user.update).toHaveBeenCalledTimes(1);
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: fakeUsers[0].id },
+        data: {
+          ...userUpdateData,
+          updatedAt: expect.any(Date),
+        },
+      });
+    });
+
+    it(`should return NotFoundException when no user is found`, async () => {
+      const notFoundUser = {
+        id: 'random user id',
+        userName: 'user_random_name',
+        email: 'user_random_email@email.com',
+        password: 'test312',
+        fullName: 'User Name Random'
+      };
+
+      jest.spyOn(prisma.user, 'update').mockRejectedValue(new Error());
+
+      try {
+        await service.updateUser(notFoundUser.id, notFoundUser.userName, notFoundUser.email, notFoundUser.password, notFoundUser.fullName);
+      } catch (error) {
+        expect(error).toEqual(new NotFoundException());
+      }
+
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: notFoundUser.id },
+        data: {
+          ...notFoundUser,
+          updatedAt: expect.any(Date),
+        },
+      });
+    });
+  });
+
+  describe('deleteUser', () => {
+    it(`should delete user and return empty body`, async () => {
+      expect(await service.deleteUser(fakeUsers[0].id)).toBeUndefined();
+      expect(prisma.user.delete).toHaveBeenCalledTimes(1);
+      expect(prisma.user.delete).toHaveBeenCalledWith({ where: { id: fakeUsers[0].id } });
+    });
+
+    it(`should return Error if user does not exist`, async () => {
+      jest.spyOn(prisma.user, 'delete').mockRejectedValue(new Error());
+
+      const randomId = randomUUID();
+      try {
+        await service.deleteUser(randomId);
+      } catch (error) {
+        expect(error).toEqual(new Error());
+      }
+
+      expect(prisma.user.delete).toHaveBeenCalledTimes(1);
+      expect(prisma.user.delete).toHaveBeenCalledWith({
+        where: { id: randomId },
+      });
+    });
   });
 });
