@@ -74,6 +74,17 @@ describe('User Controller', () => {
     });
   });
 
+  describe('findOne()', () => {
+    it('should get a user', async () => {
+      const getSpy = jest
+        .spyOn(service, 'getUser')
+        .mockResolvedValueOnce(mockUser);
+
+      await controller.getUser(mockUser.id);
+      expect(getSpy).toHaveBeenCalledWith(mockUser.id);
+    });
+  });
+
   describe('findAll()', () => {
     it('should return an array of users', async () => {
       await expect(controller.getUsers()).resolves.toEqual([
