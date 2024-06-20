@@ -66,6 +66,25 @@ describe('UserService', () => {
     jest.clearAllMocks();
   });
 
+  describe('createUser', () => {
+    it(`should create a new user`, async () => {
+      const userInput = {
+        userName: fakeUsers[0].userName,
+        email: fakeUsers[0].email,
+        password: fakeUsers[0].password,
+        fullName: fakeUsers[0].fullName
+      };
+
+      const response = await service.createUser(userInput);
+
+      expect(response).toStrictEqual(fakeUsers[0]);
+      expect(prisma.user.create).toHaveBeenCalledTimes(1);
+      expect(prisma.user.create).toHaveBeenCalledWith({
+        data: userInput,
+      });
+    });
+  });
+
   describe('getUsers', () => {
     it(`should return an array of users`, async () => {
       const response = await service.getUsers();
@@ -97,25 +116,6 @@ describe('UserService', () => {
       expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
       expect(prisma.user.findFirst).toHaveBeenCalledWith({
         where: { id: randomId },
-      });
-    });
-  });
-
-  describe('createUser', () => {
-    it(`should create a new user`, async () => {
-      const userInput = {
-        userName: fakeUsers[0].userName,
-        email: fakeUsers[0].email,
-        password: fakeUsers[0].password,
-        fullName: fakeUsers[0].fullName
-      };
-
-      const response = await service.createUser(userInput);
-
-      expect(response).toStrictEqual(fakeUsers[0]);
-      expect(prisma.user.create).toHaveBeenCalledTimes(1);
-      expect(prisma.user.create).toHaveBeenCalledWith({
-        data: userInput,
       });
     });
   });

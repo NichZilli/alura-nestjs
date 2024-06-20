@@ -63,7 +63,7 @@ describe('User Controller', () => {
     service = module.get<UserService>(UserService);
   });
 
-  describe('create()', () => {
+  describe('createUser()', () => {
     it('should create a new user', async () => {
       const createSpy = jest
         .spyOn(service, 'createUser')
@@ -74,18 +74,7 @@ describe('User Controller', () => {
     });
   });
 
-  describe('findOne()', () => {
-    it('should get a user', async () => {
-      const getSpy = jest
-        .spyOn(service, 'getUser')
-        .mockResolvedValueOnce(mockUser);
-
-      await controller.getUser(mockUser.id);
-      expect(getSpy).toHaveBeenCalledWith(mockUser.id);
-    });
-  });
-
-  describe('findAll()', () => {
+  describe('getUsers()', () => {
     it('should return an array of users', async () => {
       await expect(controller.getUsers()).resolves.toEqual([
         {
@@ -108,6 +97,39 @@ describe('User Controller', () => {
         },
       ]);
       expect(service.getUsers).toHaveBeenCalled();
+    });
+  });
+
+  describe('getUser()', () => {
+    it('should get a user', async () => {
+      const getSpy = jest
+        .spyOn(service, 'getUser')
+        .mockResolvedValueOnce(mockUser);
+
+      await controller.getUser(mockUser.id);
+      expect(getSpy).toHaveBeenCalledWith(mockUser.id);
+    });
+  });
+
+  describe('updateUser()', () => {
+    it('should update a user', async () => {
+      const updateSpy = jest
+        .spyOn(service, 'updateUser')
+        .mockResolvedValueOnce(mockUser);
+
+      await controller.updateUser(mockUser.id, createAndUpdateUserDto);
+      expect(updateSpy).toHaveBeenCalledWith(mockUser.id, mockUser.userName, mockUser.email, mockUser.password, mockUser.fullName);
+    });
+  });
+
+  describe('deleteUser()', () => {
+    it('should delete a user', async () => {
+      const deleteSpy = jest
+        .spyOn(service, 'deleteUser')
+        .mockResolvedValueOnce(mockUser);
+
+      await controller.deleteUser(mockUser.id);
+      expect(deleteSpy).toHaveBeenCalledWith(mockUser.id);
     });
   });
 });
